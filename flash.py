@@ -273,8 +273,43 @@ def decryptitem(item, pagesize):
     else:
         length=rlength
     return wfilename, start, length, rlength,[sha256sum,md5sum],decryptsize
+
+# Auto change_slot to a
+def check_current_slot():
+    # Run fastboot command to get current slot
+    result = subprocess.run(['fastboot', 'getvar', 'current-slot'], capture_output=True, text=True)
+    
+    # Extract slot information from the output
+    lines = result.stderr.split()[1]
+    current_slot = lines
+    return current_slot
+
+def set_slot_to_a():
+    # Set current slot to slot A
+    subprocess.run(['fastboot', 'set_active', 'a'])
+
+def reboot_to_bootloader():
+    # Reboot into bootloader
+    subprocess.run(['fastboot', 'reboot-bootloader'])
+
+def formatting():
+    # Formatting data
+    subprocess.run(['fastboot','-w'])
+
+def changing_slot():
+    current_slot = check_current_slot()
+    print("Current Slot:", current_slot)
+    if current_slot == "b":
+        print("Switching to Slot A...")
+        set_slot_to_a()
+        print("Rebooting into bootloader...")
+        reboot_to_bootloader()
+    else:
+        print("Device is already on Slot A.")
+# Auto change_slot to a /end
         
 def main():
+    changing_slot()
     global cpcount, invalidsuper, fatalerror
     print("Oppo/Realme Flash .OFP File on Bootloader | 1.0 (c) 2022 | Italo Almeida (@SirCDA) - GPL-3.0 License\n")
     print("Usage: Put the .ofp file in the same folder as the program,\nthen put your device in mode fastboot to start flash.")
@@ -509,7 +544,6 @@ def main():
     else:
         print(f"\nFATALERROR: {fatalerror}")
     byebye()
-
 
 if __name__=="__main__":
     main()
